@@ -1,0 +1,154 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d8eb7919-409a-40ea-a929-7b01c8fb0f19",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -380,
+        -60
+      ],
+      "id": "7aa2b973-5918-4b6c-a30b-6b01c4cd096e",
+      "name": "Webhook",
+      "webhookId": "d8eb7919-409a-40ea-a929-7b01c8fb0f19"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are an advanced AI skincare analysis assistant.\n\nYou will receive an image of a person's face.\n\nYour task:\n1. Analyze the **skin type** (e.g., dry, oily, combination, normal).\n2. Estimate the **skin age**.\n3. Estimate the **real/actual age**.\n4. Identify any visible **skin concerns** (e.g., acne, wrinkles, pigmentation).\n5. If there's any **celebrity resemblance**, identify and mention it.\n6. Provide a **detailed skincare routine and product recommendations** tailored to the user's skin condition.\n\nThe image will be provided below. Please give a well-structured and easy-to-read response.\n\nHere is the image:\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        -180
+      ],
+      "id": "d1da1c0c-2843-456c-b08d-eaf27b2e6689",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-2.0-flash-lite-001",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        100
+      ],
+      "id": "83dbfc1c-a66c-4ca2-aa70-7cb732ed06c6",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "yn7qb8m2HV2XZIA1",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        220,
+        120
+      ],
+      "id": "00c6bf93-5501-498a-934e-2644309c994b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.email }}",
+        "subject": "SKIN CARE RECOMMENDATION",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        460,
+        -180
+      ],
+      "id": "cf4d38f1-8f77-4b5e-9e47-fa1120a21040",
+      "name": "Send a message",
+      "webhookId": "15f4cfa2-e198-41e0-915c-96d8acc70b8f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "go7t8riELXQzSic7",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ad22cd1a-c6ef-4840-a954-f294e982f032",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "080ab41c9ab573947e4de7ad7c83c286f9b72acd7dbc55f2a948087080df91f7"
+  },
+  "id": "uhh4b7IlL6qteV45",
+  "tags": []
+}
